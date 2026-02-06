@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZentraMC - Asistente Virtual IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ===== VARIABLES CSS ===== */
+        :root {
+            --color-bg: #161616;
+            --color-zentra: #F5D742;
+            --color-mc: #FFFFFF;
+            --color-subtitle: #5BAA64;
+            --color-border: #E7AC44;
+            --color-msg-bg: #1D4022;
+            --color-msg-border: #297228;
+            --color-text: #FFFFFF;
+            --color-placeholder: #8B8C8C;
+            --color-user-msg: #1a2332;
+            --color-user-border: #3d5a80;
+        }
+
+        /* ===== RESET Y BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== FONDO CON ESTRELLAS ANIMADAS ===== */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.2); }
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+        }
+
+        .logo-title {
+            font-family: 'VT323', monospace;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .zentra {
+            color: var(--color-zentra);
+            text-shadow: 
+                0 0 10px var(--color-zentra),
+                0 0 20px var(--color-zentra),
+                0 0 30px var(--color-zentra),
+                0 0 40px rgba(245, 215, 66, 0.5);
+            animation: pulseYellow 3s ease-in-out infinite;
+        }
+
+        .mc {
+            color: var(--color-mc);
+            text-shadow: 
+                0 0 8px var(--color-mc),
+                0 0 15px var(--color-mc),
+                0 0 25px rgba(255, 255, 255, 0.5);
+            animation: pulseWhite 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseYellow {
+            0%, 100% { text-shadow: 0 0 10px var(--color-zentra), 0 0 20px var(--color-zentra); }
+            50% { text-shadow: 0 0 20px var(--color-zentra), 0 0 30px var(--color-zentra), 0 0 40px var(--color-zentra); }
+        }
+
+        @keyframes pulseWhite {
+            0%, 100% { text-shadow: 0 0 8px var(--color-mc), 0 0 15px var(--color-mc); }
+            50% { text-shadow: 0 0 15px var(--color-mc), 0 0 25px var(--color-mc), 0 0 35px rgba(255, 255, 255, 0.7); }
+        }
+
+        .subtitle {
+            font-family: 'VT323', monospace;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--color-subtitle);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(91, 170, 100, 0.6);
+        }
+
+        /* ===== NAVEGACIÓN ===== */
+        nav {
+            position: relative;
+            z-index: 10;
+            background: rgba(22, 22, 22, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--color-border);
+            padding: 0.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .nav-link {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--color-text);
+            text-decoration: none;
+            padding: 0.5rem 1.5rem;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--color-border);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover {
+            color: #000;
+            border-color: var(--color-border);
+        }
+
+        .nav-link:hover:before {
+            left: 0;
+        }
+
+        .nav-link.active {
+            background: var(--color-border);
+            color: #000;
+            border-color: var(--color-border);
+        }
+
+        .admin-btn {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .admin-btn:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: 2px solid var(--color-border);
+            color: var(--color-border);
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background: var(--color-border);
+            color: #000;
+        }
+
+        /* ===== PÁGINAS/SECCIONES ===== */
+        .page {
+            display: none;
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem 2rem;
+            animation: fadeInPage 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeInPage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'VT323', monospace;
+            font-size: 2.5rem;
+            color: var(--color-zentra);
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(245, 215, 66, 0.5);
+        }
+
+        .info-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-box p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 1rem;
+        }
+
+        .info-box li {
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .info-box li:before {
+            content: '▸';
+            color: var(--color-zentra);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* ===== POST CARD ===== */
+        .post-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-msg-border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .post-card:hover {
+            border-color: var(--color-border);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(231, 172, 68, 0.3);
+        }
+
+        .post-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            color: var(--color-zentra);
+            margin-bottom: 0.5rem;
+        }
+
+        .post-date {
+            font-size: 0.9rem;
+            color: var(--color-placeholder);
+            margin-bottom: 1rem;
+        }
+
+        .post-content {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: pre-wrap;
+        }
+
+        .post-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn, .delete-btn {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid;
+        }
+
+        .edit-btn {
+            background: transparent;
+            border-color: var(--color-border);
+            color: var(--color-border);
+        }
+
+        .edit-btn:hover {
+            background: var(--color-border);
+            color: #000;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .delete-btn:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        /* ===== CHAT CONTAINER ===== */
+        .chat-container {
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px rgba(231, 172, 68, 0.3),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, rgba(231, 172, 68, 0.2), rgba(91, 170, 100, 0.2));
+            padding: 1rem;
+            border-bottom: 2px solid var(--color-border);
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: var(--color-text);
+        }
+
+        .chat-status {
+            font-size: 0.9rem;
+            color: var(--color-subtitle);
+            margin-top: 0.3rem;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--color-subtitle);
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-area {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            scroll-behavior: smooth;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 5px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: var(--color-zentra);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.user .message-bubble {
+            background: var(--color-user-msg);
+            border: 2px solid var(--color-user-border);
+            margin-left: auto;
+        }
+
+        .message-sender {
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bot-sender .zentra-name {
+            color: var(--color-zentra);
+            text-shadow: 0 0 5px var(--color-zentra);
+        }
+
+        .bot-sender .mc-name {
+            color: var(--color-mc);
+        }
+
+        .user-sender {
+            color: #64B5F6;
+        }
+
+        .message-bubble {
+            background: var(--color-msg-bg);
+            border: 2px solid var(--color-msg-border);
+            border-radius: 10px;
+            padding: 1rem;
+            max-width: 85%;
+            display: inline-block;
+            text-align: left;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-text {
+            line-height: 1.6;
+            color: var(--color-text);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--color-placeholder);
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem;
+            background: var(--color-msg-bg);
+            border: 2px solid var(--color-msg-border);
+            border-radius: 10px;
+            max-width: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .typing-indicator.active {
+            display: inline-block;
+            animation: slideIn 0.4s ease;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--color-border);
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 2px solid var(--color-border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #chatInput {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(231, 172, 68, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #chatInput:focus {
+            border-color: var(--color-border);
+            box-shadow: 0 0 10px rgba(231, 172, 68, 0.3);
+        }
+
+        #chatInput::placeholder {
+            color: var(--color-placeholder);
+            font-family: 'VT323', monospace;
+        }
+
+        #sendBtn {
+            background: transparent;
+            border: 2px solid var(--color-border);
+            color: var(--color-border);
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #sendBtn:hover {
+            background: var(--color-border);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 172, 68, 0.4);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+        }
+
+        /* ===== FEATURES GRID ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-msg-border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-border);
+            box-shadow: 0 5px 20px rgba(231, 172, 68, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: var(--color-zentra);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        /* ===== SOCIAL MEDIA SECTION ===== */
+        .social-media {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .social-link {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .social-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .social-link:hover .social-icon {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+        }
+
+        .social-discord { background: #5865F2; border-color: #5865F2; }
+        .social-facebook { background: #1877F2; border-color: #1877F2; }
+        .social-youtube { background: #FF0000; border-color: #FF0000; }
+        .social-tiktok { background: #000000; border-color: #00F2EA; }
+
+        .social-label {
+            font-family: 'VT323', monospace;
+            font-size: 1rem;
+            color: var(--color-text);
+        }
+
+        .social-edit-btn {
+            display: none;
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            background: transparent;
+            border: 2px solid var(--color-border);
+            color: var(--color-border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .social-edit-btn:hover {
+            background: var(--color-border);
+            color: #000;
+        }
+
+        /* ===== MODAL DE LOGIN ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(22, 22, 22, 0.95);
+            border: 3px solid var(--color-border);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: var(--color-zentra);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(245, 215, 66, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--color-text);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: var(--color-text);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            box-shadow: 0 0 10px rgba(231, 172, 68, 0.5);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: transparent;
+            border: 2px solid var(--color-border);
+            color: var(--color-border);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-border);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .btn-secondary:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        /* ===== PANEL DE ADMINISTRACIÓN ===== */
+        .admin-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #e74c3c;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-title {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: #e74c3c;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            font-family: 'VT323', monospace;
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .admin-form {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--color-border);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .admin-form textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            border-top: 2px solid var(--color-border);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        footer p {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--color-placeholder);
+        }
+
+        .footer-zentra {
+            color: var(--color-zentra);
+            text-shadow: 0 0 10px rgba(245, 215, 66, 0.5);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+
+            .nav-container.active {
+                max-height: 600px;
+            }
+
+            .admin-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .chat-area {
+                height: 300px;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            #sendBtn {
+                padding: 0.8rem 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .social-media {
+                gap: 1.5rem;
+            }
+
+            .social-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-title {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
+
+            .chat-area {
+                height: 250px;
+                padding: 1rem;
+            }
+
+            .chat-input-area {
+                flex-direction: column;
+            }
+
+            #sendBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Estrellas animadas de fondo -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- Header -->
+    <header>
+        <h1 class="logo-title">
+            <span class="zentra">Zentra</span><span class="mc">MC</span>
+        </h1>
+        <p class="subtitle">Asistente Virtual IA</p>
+    </header>
+
+    <!-- Navegación -->
+    <nav>
+        <button class="menu-toggle" onclick="toggleMenu()">☰ MENÚ</button>
+        <div class="nav-container" id="navContainer">
+            <a class="nav-link active" onclick="showPage('inicio')">Inicio</a>
+            <a class="nav-link" onclick="showPage('sobre')">Sobre Nosotros</a>
+            <a class="nav-link" onclick="showPage('chat')">Chat IA</a>
+            <a class="nav-link" onclick="showPage('caracteristicas')">Características</a>
+            <a class="nav-link" onclick="showPage('contacto')">Contacto</a>
+            <button class="admin-btn" onclick="openLoginModal()">🔐 Admin</button>
+        </div>
+    </nav>
+
+    <!-- Modal de Login -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2 class="modal-title">🔐 Acceso Admin</h2>
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label>Usuario:</label>
+                    <input type="text" id="loginUser" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña:</label>
+                    <input type="password" id="loginPass" required autocomplete="current-password">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Post -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h2 class="modal-title">✏️ Editar Publicación</h2>
+            <form onsubmit="updatePost(event)">
+                <div class="form-group">
+                    <label>Título:</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Contenido:</label>
+                    <textarea id="editContent" required></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Enlaces Sociales -->
+    <div class="modal" id="socialModal">
+        <div class="modal-content">
+            <h2 class="modal-title">🔗 Editar Enlace Social</h2>
+            <form onsubmit="updateSocialLink(event)">
+                <div class="form-group">
+                    <label id="socialPlatformLabel">URL:</label>
+                    <input type="url" id="socialUrl" required placeholder="https://...">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSocialModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PÁGINA: INICIO -->
+    <div class="page active" id="page-inicio">
+        <div id="admin-inicio"></div>
+        
+        <h2 class="section-title">⚡ Bienvenido a ZentraMC</h2>
+        
+        <div id="posts-inicio">
+            <div class="post-card">
+                <h3 class="post-title">¡Servidor Oficial Lanzado!</h3>
+                <p class="post-date">📅 5 de Febrero, 2026</p>
+                <div class="post-content">ZentraMC es tu servidor de Minecraft Pocket Edition (MCPE) para las versiones 0.14.x - 0.15.10, funcionando con Pocketmine. 
+
+Sumérgete en un mundo pixelado lleno de posibilidades infinitas, comunidad activa y eventos únicos. ¡El futuro del Minecraft comienza aquí!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: SOBRE NOSOTROS -->
+    <div class="page" id="page-sobre">
+        <div id="admin-sobre"></div>
+        
+        <h2 class="section-title">🎮 Sobre ZentraMC</h2>
+        
+        <div id="posts-sobre">
+            <div class="post-card">
+                <h3 class="post-title">Nuestra Historia</h3>
+                <p class="post-date">📅 5 de Febrero, 2026</p>
+                <div class="post-content">ZentraMC nació de la pasión por crear experiencias únicas en Minecraft Pocket Edition.
+
+Versiones Compatibles: MinecraftPE 0.14.x - 0.15.10
+Servidor: Pocketmine
+Plataforma: Minecraft Pocket Edition
+
+Combinamos tecnología de vanguardia, comunidad activa 24/7, y modos de juego personalizados para ofrecerte la mejor experiencia MCPE.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: CHAT IA -->
+    <div class="page" id="page-chat">
+        <h2 class="section-title">💬 Chatea con ZentraMC IA</h2>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Asistente Virtual</h2>
+                <div class="chat-status">
+                    <span class="status-dot"></span>En línea
+                </div>
+            </div>
+
+            <div class="chat-area" id="chatArea">
+                <div class="message bot">
+                    <div class="message-sender bot-sender">
+                        <span class="zentra-name">Zentra</span><span class="mc-name">MC</span>:
+                    </div>
+                    <div class="message-bubble">
+                        <div class="message-text">
+                            ¡Hola! 👋 Soy el asistente virtual de ZentraMC. 
+                            Estoy aquí para ayudarte con información sobre el servidor, 
+                            comandos, eventos y cualquier duda que tengas. ¿En qué puedo ayudarte hoy?
+                        </div>
+                        <span class="message-time" id="initialTime"></span>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Escribe tu mensaje..."
+                    autocomplete="off"
+                >
+                <button id="sendBtn" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: CARACTERÍSTICAS -->
+    <div class="page" id="page-caracteristicas">
+        <div id="admin-caracteristicas"></div>
+        
+        <h2 class="section-title">✨ Características Destacadas</h2>
+        
+        <div id="posts-caracteristicas">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">IA Avanzada</h3>
+                    <p class="feature-desc">
+                        Asistente virtual inteligente disponible 24/7 para resolver tus dudas al instante.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">MCPE Compatible</h3>
+                    <p class="feature-desc">
+                        Diseñado para MinecraftPE 0.14.x - 0.15.10 con Pocketmine para la mejor experiencia móvil.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚔️</div>
+                    <h3 class="feature-title">Modos de Juego</h3>
+                    <p class="feature-desc">
+                        Survival, Creative, PvP y modos exclusivos diseñados por nuestro equipo.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3 class="feature-title">Eventos Épicos</h3>
+                    <p class="feature-desc">
+                        Torneos semanales, construcciones temáticas y recompensas increíbles.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Anti-Griefing</h3>
+                    <p class="feature-desc">
+                        Sistema de protección avanzado para mantener tus construcciones seguras.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">Comunidad</h3>
+                    <p class="feature-desc">
+                        Jugadores activos, soporte en redes sociales y staff siempre disponible.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA: CONTACTO -->
+    <div class="page" id="page-contacto">
+        <div id="admin-contacto"></div>
+        
+        <h2 class="section-title">📧 Únete a la Aventura</h2>
+        
+        <div id="posts-contacto">
+            <div class="info-box">
+                <p style="text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                    ¿Listo para comenzar tu aventura en ZentraMC?
+                </p>
+                <p style="text-align: center;">
+                    <strong>IP del Servidor:</strong> <span style="color: var(--color-zentra);">play.zentramc.net</span>
+                </p>
+                <p style="text-align: center;">
+                    <strong>Versión Compatible:</strong> MinecraftPE 0.14.x - 0.15.10
+                </p>
+                <p style="text-align: center;">
+                    <strong>Servidor:</strong> Pocketmine
+                </p>
+                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.95rem; color: rgba(255, 255, 255, 0.7);">
+                    Puedes usar nuestro asistente IA para resolver cualquier duda antes de unirte. 
+                    ¡Te esperamos en ZentraMC! 🎮
+                </p>
+            </div>
+
+            <h3 class="section-title" style="font-size: 2rem; margin-top: 2rem;">🌐 Síguenos en Redes Sociales</h3>
+            
+            <div class="social-media" id="socialMedia">
+                <div class="social-link" data-platform="discord">
+                    <div class="social-icon social-discord">💬</div>
+                    <span class="social-label">Discord</span>
+                    <button class="social-edit-btn" onclick="openSocialModal('discord')">Editar</button>
+                </div>
+
+                <div class="social-link" data-platform="facebook">
+                    <div class="social-icon social-facebook">📘</div>
+                    <span class="social-label">Facebook</span>
+                    <button class="social-edit-btn" onclick="openSocialModal('facebook')">Editar</button>
+                </div>
+
+                <div class="social-link" data-platform="youtube">
+                    <div class="social-icon social-youtube">▶️</div>
+                    <span class="social-label">YouTube</span>
+                    <button class="social-edit-btn" onclick="openSocialModal('youtube')">Editar</button>
+                </div>
+
+                <div class="social-link" data-platform="tiktok">
+                    <div class="social-icon social-tiktok">🎵</div>
+                    <span class="social-label">TikTok</span>
+                    <button class="social-edit-btn" onclick="openSocialModal('tiktok')">Editar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            © 2026 <span class="footer-zentra">ZentraMC</span> - Todos los derechos reservados
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 1rem;">
+            Potenciado por Inteligencia Artificial | MinecraftPE 0.14.x - 0.15.10
+        </p>
+    </footer>
+
+    <script>
+        // ===== SISTEMA DE AUTENTICACIÓN =====
+        let isLoggedIn = false;
+        const ADMIN_USER = 'ZentraMC';
+        const ADMIN_PASS = 'Revive';
+
+        // ===== ALMACENAMIENTO DE DATOS =====
+        let posts = {
+            inicio: JSON.parse(localStorage.getItem('posts_inicio')) || [],
+            sobre: JSON.parse(localStorage.getItem('posts_sobre')) || [],
+            caracteristicas: JSON.parse(localStorage.getItem('posts_caracteristicas')) || [],
+            contacto: JSON.parse(localStorage.getItem('posts_contacto')) || []
+        };
+
+        let socialLinks = JSON.parse(localStorage.getItem('social_links')) || {
+            discord: 'https://discord.gg/zentramc',
+            facebook: 'https://facebook.com/zentramc',
+            youtube: 'https://youtube.com/@zentramc',
+            tiktok: 'https://tiktok.com/@zentramc'
+        };
+
+        let currentEditPost = null;
+        let currentSocialPlatform = null;
+
+        // ===== GENERACIÓN DE ESTRELLAS =====
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 100;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                
+                container.appendChild(star);
+            }
+        }
+
+        // ===== NAVEGACIÓN ENTRE PÁGINAS =====
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            document.getElementById('page-' + pageName).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.getElementById('navContainer').classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMenu() {
+            const navContainer = document.getElementById('navContainer');
+            navContainer.classList.toggle('active');
+        }
+
+        // ===== LOGIN MODAL =====
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                isLoggedIn = true;
+                closeLoginModal();
+                alert('✅ Acceso concedido. Panel de administración activado.');
+                showAdminPanels();
+                updateSocialEditButtons();
+            } else {
+                alert('❌ Usuario o contraseña incorrectos.');
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            hideAdminPanels();
+            updateSocialEditButtons();
+            alert('👋 Sesión cerrada correctamente.');
+        }
+
+        // ===== MOSTRAR/OCULTAR PANELES ADMIN =====
+        function showAdminPanels() {
+            const pages = ['inicio', 'sobre', 'caracteristicas', 'contacto'];
+            pages.forEach(page => {
+                const adminDiv = document.getElementById('admin-' + page);
+                adminDiv.innerHTML = `
+                    <div class="admin-panel">
+                        <div class="admin-header">
+                            <h3 class="admin-title">⚙️ Panel de Administración</h3>
+                            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+                        </div>
+                        <form class="admin-form" onsubmit="addPost(event, '${page}')">
+                            <div class="form-group">
+                                <label>Título de la Publicación:</label>
+                                <input type="text" id="title-${page}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contenido:</label>
+                                <textarea id="content-${page}" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Publicar</button>
+                        </form>
+                    </div>
+                `;
+            });
+            renderPosts('inicio');
+            renderPosts('sobre');
+            renderPosts('caracteristicas');
+            renderPosts('contacto');
+        }
+
+        function hideAdminPanels() {
+            const pages = ['inicio', 'sobre', 'caracteristicas', 'contacto'];
+            pages.forEach(page => {
+                document.getElementById('admin-' + page).innerHTML = '';
+            });
+            renderPosts('inicio');
+            renderPosts('sobre');
+            renderPosts('caracteristicas');
+            renderPosts('contacto');
+        }
+
+        // ===== AGREGAR POST =====
+        function addPost(event, section) {
+            event.preventDefault();
+            const title = document.getElementById('title-' + section).value;
+            const content = document.getElementById('content-' + section).value;
+            const date = new Date().toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            const post = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: date
+            };
+
+            posts[section].push(post);
+            localStorage.setItem('posts_' + section, JSON.stringify(posts[section]));
+
+            document.getElementById('title-' + section).value = '';
+            document.getElementById('content-' + section).value = '';
+
+            renderPosts(section);
+            alert('✅ Publicación creada exitosamente!');
+        }
+
+        // ===== EDITAR POST =====
+        function openEditModal(section, postId) {
+            const post = posts[section].find(p => p.id === postId);
+            if (!post) return;
+
+            currentEditPost = { section, postId };
+            document.getElementById('editTitle').value = post.title;
+            document.getElementById('editContent').value = post.content;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditPost = null;
+        }
+
+        function updatePost(event) {
+            event.preventDefault();
+            if (!currentEditPost) return;
+
+            const { section, postId } = currentEditPost;
+            const postIndex = posts[section].findIndex(p => p.id === postId);
+            
+            if (postIndex === -1) return;
+
+            posts[section][postIndex].title = document.getElementById('editTitle').value;
+            posts[section][postIndex].content = document.getElementById('editContent').value;
+
+            localStorage.setItem('posts_' + section, JSON.stringify(posts[section]));
+            renderPosts(section);
+            closeEditModal();
+            alert('✅ Publicación actualizada exitosamente!');
+        }
+
+        // ===== ELIMINAR POST =====
+        function deletePost(section, postId) {
+            if (confirm('¿Estás seguro de eliminar esta publicación?')) {
+                posts[section] = posts[section].filter(p => p.id !== postId);
+                localStorage.setItem('posts_' + section, JSON.stringify(posts[section]));
+                renderPosts(section);
+                alert('🗑️ Publicación eliminada.');
+            }
+        }
+
+        // ===== RENDERIZAR POSTS =====
+        function renderPosts(section) {
+            const container = document.getElementById('posts-' + section);
+            const sectionPosts = posts[section];
+
+            if (sectionPosts.length === 0) return;
+
+            let html = '';
+            sectionPosts.forEach(post => {
+                html += `
+                    <div class="post-card">
+                        <h3 class="post-title">${post.title}</h3>
+                        <p class="post-date">📅 ${post.date}</p>
+                        <div class="post-content">${post.content}</div>
+                        ${isLoggedIn ? `
+                            <div class="post-actions">
+                                <button class="edit-btn" onclick="openEditModal('${section}', ${post.id})">✏️ Editar</button>
+                                <button class="delete-btn" onclick="deletePost('${section}', ${post.id})">🗑️ Eliminar</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ===== ENLACES SOCIALES =====
+        function updateSocialEditButtons() {
+            const editButtons = document.querySelectorAll('.social-edit-btn');
+            editButtons.forEach(btn => {
+                btn.style.display = isLoggedIn ? 'block' : 'none';
+            });
+        }
+
+        function openSocialModal(platform) {
+            if (!isLoggedIn) return;
+            
+            currentSocialPlatform = platform;
+            document.getElementById('socialPlatformLabel').textContent = `URL de ${platform.charAt(0).toUpperCase() + platform.slice(1)}:`;
+            document.getElementById('socialUrl').value = socialLinks[platform] || '';
+            document.getElementById('socialModal').classList.add('active');
+        }
+
+        function closeSocialModal() {
+            document.getElementById('socialModal').classList.remove('active');
+            currentSocialPlatform = null;
+        }
+
+        function updateSocialLink(event) {
+            event.preventDefault();
+            if (!currentSocialPlatform) return;
+
+            const url = document.getElementById('socialUrl').value;
+            socialLinks[currentSocialPlatform] = url;
+            localStorage.setItem('social_links', JSON.stringify(socialLinks));
+            
+            updateSocialLinks();
+            closeSocialModal();
+            alert('✅ Enlace actualizado exitosamente!');
+        }
+
+        function updateSocialLinks() {
+            const socialElements = document.querySelectorAll('.social-link');
+            socialElements.forEach(element => {
+                const platform = element.getAttribute('data-platform');
+                const url = socialLinks[platform];
+                
+                // Remove old click handler
+                element.onclick = null;
+                
+                // Add new click handler
+                if (!isLoggedIn) {
+                    element.style.cursor = 'pointer';
+                    element.onclick = function() {
+                        if (url) {
+                            window.open(url, '_blank');
+                        }
+                    };
+                } else {
+                    element.querySelector('.social-icon').style.cursor = 'pointer';
+                    element.querySelector('.social-icon').onclick = function(e) {
+                        e.stopPropagation();
+                        if (url) {
+                            window.open(url, '_blank');
+                        }
+                    };
+                }
+            });
+        }
+
+        // ===== CHAT IA CON RESPUESTAS AUTÓNOMAS =====
+        const chatArea = document.getElementById('chatArea');
+        const chatInput = document.getElementById('chatInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Base de conocimiento para IA autónoma
+        const aiKnowledge = {
+            servidor: {
+                keywords: ['ip', 'servidor', 'server', 'direccion', 'conectar'],
+                responses: [
+                    'La IP del servidor ZentraMC es: play.zentramc.net 🎮',
+                    'Puedes conectarte a nuestro servidor usando la IP: play.zentramc.net',
+                    'Para jugar en ZentraMC, usa la IP: play.zentramc.net en MinecraftPE 0.14.x - 0.15.10'
+                ]
+            },
+            version: {
+                keywords: ['version', 'versión', 'mcpe', 'minecraft', 'pocketmine', 'compatible'],
+                responses: [
+                    'ZentraMC funciona con MinecraftPE versiones 0.14.x - 0.15.10 usando Pocketmine 📱',
+                    'Nuestro servidor es compatible con MCPE 0.14.x hasta 0.15.10, corriendo en Pocketmine',
+                    'Usamos Pocketmine para MinecraftPE versiones 0.14.x - 0.15.10'
+                ]
+            },
+            discord: {
+                keywords: ['discord', 'comunidad', 'chat', 'grupo'],
+                responses: [
+                    '¡Únete a nuestra comunidad de Discord! 💬 El enlace está en la sección de Contacto',
+                    'Tenemos un servidor de Discord muy activo. Búscalo en la sección Contacto para unirte',
+                    'Discord es donde nuestra comunidad se reúne. Visita la sección Contacto para el enlace'
+                ]
+            },
+            comandos: {
+                keywords: ['comando', 'comandos', 'command', 'help', 'ayuda'],
+                responses: [
+                    'Comandos básicos: /spawn, /home, /tpa, /warp. ¿Necesitas ayuda con alguno en específico? 📝',
+                    'Puedes usar /help en el juego para ver todos los comandos. Los principales son /spawn, /home y /tpa',
+                    'Los comandos esenciales son: /spawn (ir al spawn), /home (tu casa), /tpa (teletransporte a jugador)'
+                ]
+            },
+            eventos: {
+                keywords: ['evento', 'eventos', 'torneo', 'competencia', 'premio'],
+                responses: [
+                    '¡Organizamos eventos épicos semanalmente! Torneos PvP, construcciones y más con premios increíbles 🏆',
+                    'Eventos cada semana: PvP los viernes, construcciones los domingos. ¡Grandes premios te esperan!',
+                    'Nuestros eventos incluyen torneos PvP, competencias de construcción y desafíos especiales con recompensas'
+                ]
+            },
+            proteccion: {
+                keywords: ['proteger', 'proteccion', 'protección', 'claim', 'griefing', 'seguro'],
+                responses: [
+                    'Protege tus construcciones con /claim. Es gratis y mantiene todo seguro 🔒',
+                    'Usamos sistema anti-griefing. Usa /claim para proteger tu área de construcción',
+                    'Tu base estará segura con /claim. Nadie podrá destruir o modificar tu zona protegida'
+                ]
+            },
+            economia: {
+                keywords: ['dinero', 'economia', 'economía', 'tienda', 'comprar', 'vender', 'job'],
+                responses: [
+                    'Gana dinero con /jobs, vende en /ah (auction house) o comercia con otros jugadores 💰',
+                    'Nuestro sistema económico incluye trabajos, subastas y comercio entre jugadores',
+                    'Usa /jobs para trabajar, /ah para subastar items, o intercambia directamente con jugadores'
+                ]
+            },
+            rangos: {
+                keywords: ['rango', 'rangos', 'vip', 'donacion', 'donación', 'elite'],
+                responses: [
+                    'Tenemos rangos VIP, ELITE y LEGEND con beneficios exclusivos. Usa /rangos en el juego 👑',
+                    'Los rangos especiales ofrecen comandos extra, kits y ventajas. Revisa /rangos para detalles',
+                    'Rangos disponibles: VIP (básico), ELITE (avanzado), LEGEND (premium). Cada uno con beneficios únicos'
+                ]
+            },
+            modos: {
+                keywords: ['modo', 'modos', 'gamemode', 'survival', 'creative', 'pvp'],
+                responses: [
+                    'Ofrecemos Survival, Creative, PvP y modos exclusivos personalizados ⚔️',
+                    'Puedes jugar en diferentes modos: Survival clásico, Creative para construir, PvP competitivo y más',
+                    'Modos disponibles: Survival (principal), Creative, PvP Arena, y modos especiales rotativos'
+                ]
+            },
+            staff: {
+                keywords: ['staff', 'admin', 'moderador', 'ayuda', 'soporte', 'reporte'],
+                responses: [
+                    'Nuestro staff está disponible 24/7. Usa /staff en el juego o contacta vía Discord 🛡️',
+                    'Para reportes o ayuda, escribe /report en el juego o contacta a un moderador en Discord',
+                    'El equipo de administración está siempre atento. Usa /staff para ver quién está online'
+                ]
+            },
+            saludos: {
+                keywords: ['hola', 'buenas', 'hey', 'hi', 'hello', 'que tal', 'qué tal'],
+                responses: [
+                    '¡Hola! 👋 Bienvenido a ZentraMC. ¿En qué puedo ayudarte hoy?',
+                    '¡Hola! 😊 Soy el asistente de ZentraMC. ¿Tienes alguna pregunta sobre el servidor?',
+                    '¡Hey! 🎮 ¿Qué necesitas saber sobre ZentraMC?'
+                ]
+            },
+            despedida: {
+                keywords: ['adios', 'adiós', 'chao', 'bye', 'nos vemos', 'hasta luego'],
+                responses: [
+                    '¡Hasta luego! Nos vemos en ZentraMC 👋',
+                    '¡Adiós! Que disfrutes jugando en el servidor 🎮',
+                    '¡Nos vemos! Si tienes más preguntas, estaré aquí 😊'
+                ]
+            },
+            reglas: {
+                keywords: ['regla', 'reglas', 'norma', 'normas', 'permitido', 'prohibido'],
+                responses: [
+                    'Las reglas principales: No hacer trampa, respetar a otros jugadores, no griefing. Lee /rules en el juego 📋',
+                    'Reglas básicas: Respeto mutuo, no hacks, no spam, no griefing. Usa /rules para la lista completa',
+                    'Mantén el juego limpio: Sin cheats, sin insultos, sin destruir construcciones ajenas. /rules para más info'
+                ]
+            }
+        };
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        document.getElementById('initialTime').textContent = getCurrentTime();
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+
+            addMessage(message, 'user');
+            chatInput.value = '';
+
+            typingIndicator.classList.add('active');
+
+            setTimeout(() => {
+                typingIndicator.classList.remove('active');
+                const response = getAIResponse(message);
+                addMessage(response, 'bot');
+            }, 1000 + Math.random() * 1500);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const senderDiv = document.createElement('div');
+            senderDiv.className = `message-sender ${sender}-sender`;
+            
+            if (sender === 'bot') {
+                senderDiv.innerHTML = '<span class="zentra-name">Zentra</span><span class="mc-name">MC</span>:';
+            } else {
+                senderDiv.textContent = 'Tú:';
+            }
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = getCurrentTime();
+
+            bubbleDiv.appendChild(textDiv);
+            bubbleDiv.appendChild(timeSpan);
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(bubbleDiv);
+
+            chatArea.insertBefore(messageDiv, typingIndicator);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function getAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Buscar coincidencias en la base de conocimiento
+            for (const [category, data] of Object.entries(aiKnowledge)) {
+                for (const keyword of data.keywords) {
+                    if (message.includes(keyword)) {
+                        // Retornar una respuesta aleatoria de la categoría
+                        const randomIndex = Math.floor(Math.random() * data.responses.length);
+                        return data.responses[randomIndex];
+                    }
+                }
+            }
+            
+            // Respuestas genéricas si no hay coincidencia
+            const defaultResponses = [
+                'Interesante pregunta. Para información más específica, te recomiendo contactar a nuestro staff en Discord o usar el comando /help en el servidor 💬',
+                'No tengo información exacta sobre eso, pero nuestro equipo en Discord puede ayudarte con detalles más específicos 🤔',
+                '¡Buena pregunta! Te sugiero explorar el servidor o preguntar en Discord para obtener más información detallada 🔍',
+                'Eso es algo que el staff puede explicarte mejor. ¿Hay algo más sobre el servidor en lo que pueda ayudarte? 😊',
+                'No encuentro información específica sobre eso. Intenta preguntar sobre: comandos, eventos, rangos, protección, o la versión del servidor 📚'
+            ];
+            
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // ===== PARALLAX EFFECT =====
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                const speed = (index % 3 + 1) * 0.1;
+                star.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            renderPosts('inicio');
+            renderPosts('sobre');
+            renderPosts('caracteristicas');
+            renderPosts('contacto');
+            updateSocialLinks();
+            updateSocialEditButtons();
+        });
+    </script>
+</body>
+</html>
